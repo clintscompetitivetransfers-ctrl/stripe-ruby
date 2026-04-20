@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require File.expand_path("../test_helper", __dir__)
+require "bigdecimal"
 module Stripe
   class CodegennedExampleTest < Test::Unit::TestCase
     should "Test account links post" do
@@ -5712,8 +5713,8 @@ module Stripe
             fuel: {
               type: "diesel",
               unit: "liter",
-              unit_cost_decimal: "3.5",
-              quantity_decimal: "10",
+              unit_cost_decimal: BigDecimal("3.5"),
+              quantity_decimal: BigDecimal("10"),
             },
             lodging: {
               check_in_at: 1_633_651_200,
@@ -5722,7 +5723,7 @@ module Stripe
             receipt: [
               {
                 description: "Room charge",
-                quantity: "1",
+                quantity: BigDecimal("1"),
                 total: 200,
                 unit_cost: 200,
               },
@@ -6055,8 +6056,8 @@ module Stripe
           fuel: {
             type: "diesel",
             unit: "liter",
-            unit_cost_decimal: "3.5",
-            quantity_decimal: "10",
+            unit_cost_decimal: BigDecimal("3.5"),
+            quantity_decimal: BigDecimal("10"),
           },
           lodging: {
             check_in_at: 1_533_651_200,
@@ -6065,7 +6066,7 @@ module Stripe
           receipt: [
             {
               description: "Room charge",
-              quantity: "1",
+              quantity: BigDecimal("1"),
               total: 200,
               unit_cost: 200,
             },
@@ -6171,8 +6172,8 @@ module Stripe
           fuel: {
             type: "diesel",
             unit: "liter",
-            unit_cost_decimal: "3.5",
-            quantity_decimal: "10",
+            unit_cost_decimal: BigDecimal("3.5"),
+            quantity_decimal: BigDecimal("10"),
           },
           lodging: {
             check_in_at: 1_533_651_200,
@@ -6181,7 +6182,7 @@ module Stripe
           receipt: [
             {
               description: "Room charge",
-              quantity: "1",
+              quantity: BigDecimal("1"),
               total: 200,
               unit_cost: 200,
             },
@@ -7881,6 +7882,18 @@ module Stripe
 
       event = client.v2.core.event_destinations.ping("id_123")
       assert_requested :post, "#{Stripe::DEFAULT_API_BASE}/v2/core/event_destinations/id_123/ping"
+    end
+    should "Test rate limit error (service)" do
+      stub_request(:get, "#{Stripe::DEFAULT_API_BASE}/v2/core/accounts").to_return(
+        body: '{"error":{"type":"rate_limit","code":"account_rate_limit_exceeded"}}',
+        status: 400
+      )
+      client = Stripe::StripeClient.new("sk_test_123")
+
+      assert_raises Stripe::RateLimitError do
+        accounts = client.v2.core.accounts.list
+      end
+      assert_requested :get, "#{Stripe::DEFAULT_API_BASE}/v2/core/accounts"
     end
     should "Test temporary session expired error (service)" do
       stub_request(

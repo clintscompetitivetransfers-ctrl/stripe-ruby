@@ -79,6 +79,10 @@ module Stripe
           @unit_amount = unit_amount
           @unit_amount_decimal = unit_amount_decimal
         end
+
+        def self.field_encodings
+          @field_encodings = { unit_amount_decimal: :decimal_string }
+        end
       end
       # The coupons to redeem into discounts for the item.
       attr_accessor :discounts
@@ -111,6 +115,12 @@ module Stripe
         @price_data = price_data
         @quantity = quantity
         @tax_rates = tax_rates
+      end
+
+      def self.field_encodings
+        @field_encodings = {
+          price_data: { kind: :object, fields: { unit_amount_decimal: :decimal_string } },
+        }
       end
     end
 
@@ -293,6 +303,10 @@ module Stripe
           @unit_amount = unit_amount
           @unit_amount_decimal = unit_amount_decimal
         end
+
+        def self.field_encodings
+          @field_encodings = { unit_amount_decimal: :decimal_string }
+        end
       end
       # Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period. Pass an empty string to remove previously-defined thresholds.
       attr_accessor :billing_thresholds
@@ -330,6 +344,12 @@ module Stripe
         @quantity = quantity
         @tax_rates = tax_rates
       end
+
+      def self.field_encodings
+        @field_encodings = {
+          price_data: { kind: :object, fields: { unit_amount_decimal: :decimal_string } },
+        }
+      end
     end
 
     class PaymentSettings < ::Stripe::RequestParams
@@ -365,7 +385,7 @@ module Stripe
 
         class Card < ::Stripe::RequestParams
           class MandateOptions < ::Stripe::RequestParams
-            # Amount to be charged for future payments.
+            # Amount to be charged for future payments, specified in the presentment currency.
             attr_accessor :amount
             # One of `fixed` or `maximum`. If `fixed`, the `amount` param refers to the exact amount to be charged in future payments. If `maximum`, the amount charged can be up to the value passed for the `amount` param.
             attr_accessor :amount_type
@@ -641,7 +661,7 @@ module Stripe
     attr_accessor :payment_behavior
     # Payment settings to pass to invoices created by the subscription.
     attr_accessor :payment_settings
-    # Specifies an interval for how often to bill for any pending invoice items. It is analogous to calling [Create an invoice](https://docs.stripe.com/api#create_invoice) for the given subscription at the specified interval.
+    # Specifies an interval for how often to bill for any pending invoice items. It is analogous to calling [Create an invoice](/api/invoices/create) for the given subscription at the specified interval.
     attr_accessor :pending_invoice_item_interval
     # Determines how to handle [prorations](https://docs.stripe.com/billing/subscriptions/prorations) resulting from the `billing_cycle_anchor`. If no value is passed, the default is `create_prorations`.
     attr_accessor :proration_behavior
@@ -728,6 +748,25 @@ module Stripe
       @trial_from_plan = trial_from_plan
       @trial_period_days = trial_period_days
       @trial_settings = trial_settings
+    end
+
+    def self.field_encodings
+      @field_encodings = {
+        add_invoice_items: {
+          kind: :array,
+          element: {
+            kind: :object,
+            fields: { price_data: { kind: :object, fields: { unit_amount_decimal: :decimal_string } } },
+          },
+        },
+        items: {
+          kind: :array,
+          element: {
+            kind: :object,
+            fields: { price_data: { kind: :object, fields: { unit_amount_decimal: :decimal_string } } },
+          },
+        },
+      }
     end
   end
 end

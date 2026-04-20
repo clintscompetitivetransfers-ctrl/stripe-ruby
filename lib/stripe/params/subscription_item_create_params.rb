@@ -67,6 +67,10 @@ module Stripe
         @unit_amount = unit_amount
         @unit_amount_decimal = unit_amount_decimal
       end
+
+      def self.field_encodings
+        @field_encodings = { unit_amount_decimal: :decimal_string }
+      end
     end
     # Define thresholds at which an invoice will be sent, and the subscription advanced to a new billing period. Pass an empty string to remove previously-defined thresholds.
     attr_accessor :billing_thresholds
@@ -92,7 +96,7 @@ module Stripe
     attr_accessor :price_data
     # Determines how to handle [prorations](https://docs.stripe.com/billing/subscriptions/prorations) when the billing cycle changes (e.g., when switching plans, resetting `billing_cycle_anchor=now`, or starting a trial), or if an item's `quantity` changes. The default value is `create_prorations`.
     attr_accessor :proration_behavior
-    # If set, the proration will be calculated as though the subscription was updated at the given time. This can be used to apply the same proration that was previewed with the [upcoming invoice](https://api.stripe.com#retrieve_customer_invoice) endpoint.
+    # If set, the proration will be calculated as though the subscription was updated at the given time. This can be used to apply the same proration that was previewed with the [upcoming invoice](/api/invoices/create_preview) endpoint.
     attr_accessor :proration_date
     # The quantity you'd like to apply to the subscription item you're creating.
     attr_accessor :quantity
@@ -129,6 +133,12 @@ module Stripe
       @quantity = quantity
       @subscription = subscription
       @tax_rates = tax_rates
+    end
+
+    def self.field_encodings
+      @field_encodings = {
+        price_data: { kind: :object, fields: { unit_amount_decimal: :decimal_string } },
+      }
     end
   end
 end

@@ -5,7 +5,7 @@ module Stripe
   class SubscriptionService < StripeService
     # Cancels a customer's subscription immediately. The customer won't be charged again for the subscription. After it's canceled, you can no longer update the subscription or its [metadata](https://docs.stripe.com/metadata).
     #
-    # Any pending invoice items that you've created are still charged at the end of the period, unless manually [deleted](https://docs.stripe.com/api#delete_invoiceitem). If you've set the subscription to cancel at the end of the period, any pending prorations are also left in place and collected at the end of the period. But if the subscription is set to cancel immediately, pending prorations are removed if invoice_now and prorate are both set to true.
+    # Any pending invoice items that you've created are still charged at the end of the period, unless manually [deleted](https://docs.stripe.com/api/invoiceitems/delete). If you've set the subscription to cancel at the end of the period, any pending prorations are also left in place and collected at the end of the period. But if the subscription is set to cancel immediately, pending prorations are removed if invoice_now and prorate are both set to true.
     #
     # By default, upon subscription cancellation, Stripe stops automatic collection of all finalized invoices for the customer. This is intended to prevent unexpected payment attempts after the customer has canceled a subscription. However, you can resume automatic collection of the invoices manually after subscription cancellation to have us proceed. Or, you could check for unpaid invoices before allowing the customer to cancel the subscription at all.
     def cancel(subscription_exposed_id, params = {}, opts = {})
@@ -26,6 +26,8 @@ module Stripe
     # To start subscriptions where the first invoice always begins in a draft status, use [subscription schedules](https://docs.stripe.com/docs/billing/subscriptions/subscription-schedules#managing) instead.
     # Schedules provide the flexibility to model more complex billing configurations that change over time.
     def create(params = {}, opts = {})
+      params = SubscriptionCreateParams.coerce_params(params) unless params.is_a?(Stripe::RequestParams)
+
       request(
         method: :post,
         path: "/v1/subscriptions",
@@ -126,6 +128,8 @@ module Stripe
     #
     # Updating the quantity on a subscription many times in an hour may result in [rate limiting. If you need to bill for a frequently changing quantity, consider integrating <a href="/docs/billing/subscriptions/usage-based">usage-based billing](https://docs.stripe.com/docs/rate-limits) instead.
     def update(subscription_exposed_id, params = {}, opts = {})
+      params = SubscriptionUpdateParams.coerce_params(params) unless params.is_a?(Stripe::RequestParams)
+
       request(
         method: :post,
         path: format("/v1/subscriptions/%<subscription_exposed_id>s", { subscription_exposed_id: CGI.escape(subscription_exposed_id) }),

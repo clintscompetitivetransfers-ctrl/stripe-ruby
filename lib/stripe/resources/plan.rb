@@ -40,6 +40,13 @@ module Stripe
       def self.field_remappings
         @field_remappings = {}
       end
+
+      def self.field_encodings
+        @field_encodings = {
+          flat_amount_decimal: :decimal_string,
+          unit_amount_decimal: :decimal_string,
+        }
+      end
     end
 
     class TransformUsage < ::Stripe::StripeObject
@@ -74,7 +81,7 @@ module Stripe
     attr_reader :interval
     # The number of intervals (specified in the `interval` attribute) between subscription billings. For example, `interval=month` and `interval_count=3` bills every 3 months.
     attr_reader :interval_count
-    # Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
+    # If the object exists in live mode, the value is `true`. If the object exists in test mode, the value is `false`.
     attr_reader :livemode
     # Set of [key-value pairs](https://docs.stripe.com/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format.
     attr_reader :metadata
@@ -145,6 +152,19 @@ module Stripe
 
     def self.field_remappings
       @field_remappings = {}
+    end
+
+    def self.field_encodings
+      @field_encodings = {
+        amount_decimal: :decimal_string,
+        tiers: {
+          kind: :array,
+          element: {
+            kind: :object,
+            fields: { flat_amount_decimal: :decimal_string, unit_amount_decimal: :decimal_string },
+          },
+        },
+      }
     end
   end
 end

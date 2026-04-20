@@ -56,6 +56,13 @@ module Stripe
         def self.field_remappings
           @field_remappings = {}
         end
+
+        def self.field_encodings
+          @field_encodings = {
+            flat_amount_decimal: :decimal_string,
+            unit_amount_decimal: :decimal_string,
+          }
+        end
       end
       # When set, provides configuration for the amount to be adjusted by the customer during Checkout Sessions and Payment Links.
       attr_reader :custom_unit_amount
@@ -74,6 +81,19 @@ module Stripe
 
       def self.field_remappings
         @field_remappings = {}
+      end
+
+      def self.field_encodings
+        @field_encodings = {
+          tiers: {
+            kind: :array,
+            element: {
+              kind: :object,
+              fields: { flat_amount_decimal: :decimal_string, unit_amount_decimal: :decimal_string },
+            },
+          },
+          unit_amount_decimal: :decimal_string,
+        }
       end
     end
 
@@ -134,6 +154,13 @@ module Stripe
       def self.field_remappings
         @field_remappings = {}
       end
+
+      def self.field_encodings
+        @field_encodings = {
+          flat_amount_decimal: :decimal_string,
+          unit_amount_decimal: :decimal_string,
+        }
+      end
     end
 
     class TransformQuantity < ::Stripe::StripeObject
@@ -164,7 +191,7 @@ module Stripe
     attr_reader :custom_unit_amount
     # Unique identifier for the object.
     attr_reader :id
-    # Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
+    # If the object exists in live mode, the value is `true`. If the object exists in test mode, the value is `false`.
     attr_reader :livemode
     # A lookup key used to retrieve prices dynamically from a static string. This may be up to 200 characters.
     attr_reader :lookup_key
@@ -235,6 +262,19 @@ module Stripe
 
     def self.field_remappings
       @field_remappings = {}
+    end
+
+    def self.field_encodings
+      @field_encodings = {
+        tiers: {
+          kind: :array,
+          element: {
+            kind: :object,
+            fields: { flat_amount_decimal: :decimal_string, unit_amount_decimal: :decimal_string },
+          },
+        },
+        unit_amount_decimal: :decimal_string,
+      }
     end
   end
 end

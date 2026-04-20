@@ -7,7 +7,13 @@ module Stripe
       module Accounts
         class PersonTokenService < StripeService
           # Creates a Person Token associated with an Account.
+          #
+          # ** raises RateLimitError
           def create(account_id, params = {}, opts = {})
+            unless params.is_a?(Stripe::RequestParams)
+              params = V2::Core::Accounts::PersonTokenCreateParams.coerce_params(params)
+            end
+
             request(
               method: :post,
               path: format("/v2/core/accounts/%<account_id>s/person_tokens", { account_id: CGI.escape(account_id) }),
@@ -18,6 +24,8 @@ module Stripe
           end
 
           # Retrieves a Person Token associated with an Account.
+          #
+          # ** raises RateLimitError
           def retrieve(account_id, id, params = {}, opts = {})
             request(
               method: :get,
